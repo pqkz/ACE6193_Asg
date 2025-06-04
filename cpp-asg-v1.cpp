@@ -27,7 +27,7 @@ class Flashcard //load, save flashcard
         userScore =0;
     }
 
-    Flashcard(string a_question, string a_ans, string a_hint, int a_diffscore, int a_userscore)
+    Flashcard(string a_question, string a_ans, string a_hint, int a_diffscore, int a_userscore) //parameterised constructor
     {
         question = a_question;
         answer = a_ans;
