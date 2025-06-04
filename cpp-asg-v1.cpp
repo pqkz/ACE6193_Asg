@@ -214,5 +214,7 @@ class User//keeps track of user progress
 };
 int main()
 {
-
+    User user;
+    user.startSession();
+    return 0;
 }
