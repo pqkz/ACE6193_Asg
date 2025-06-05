@@ -7,7 +7,7 @@ using namespace std;
 const int MAX_FLASHCARDS = 20;
 const int MAX_USERS = 10;
 
-class Flashcard //load, save flashcard
+class Flashcard 
 {
     
     public:
@@ -62,16 +62,10 @@ class Flashcard //load, save flashcard
             userScore--;
     }
 
-    //void save(ofstream& out)const { //savefile
+};
 
-    //}
-
-    //void load(ifstream& in) //load file
-    //{
-
-    //}
-    
-
+class ScoreManager
+{
 
 
 };
@@ -81,6 +75,7 @@ class FlashcardManager //add flashcards,manage cards
     public:
     Flashcard flashcards[MAX_FLASHCARDS];
     int count;
+    string filename;
 
     FlashcardManager():count(0){}
 
@@ -164,8 +159,85 @@ class FlashcardManager //add flashcards,manage cards
 
                 }
             }
+
+            int difficulty;
+            cout <<"Rate the difficulty(1=Easy, 2=Moderate, 3=Hard)";
+            cin >>difficulty;
+            while(difficulty<1||difficulty>3)
+            {
+                cout << "Invalid input. Please enter 1, 2, or 3: ";
+                cin >> difficulty;
+            }
+
+            cin.ignore();
+            flashcards[i].difficultyScore = difficulty;
         }
     }
+
+    void loadData(const string &filename)
+    {
+        ifstream rf(filename, ios::in|ios::binary);
+        if(!rf)
+        {
+            cout <<"Cannot open file for reading!"<<endl;
+            return;
+        }
+
+        rf.read((char*)&count,sizeof(count));
+        if (count > MAX_FLASHCARDS)
+            count = MAX_FLASHCARDS;
+
+        for (int i = 0; i < count; i++)
+        {
+            flashcards[i].question = readString(rf);
+            flashcards[i].answer = readString(rf);
+            flashcards[i].hint = readString(rf);
+            rf.read((char *)&flashcards[i].difficultyScore, sizeof(int));
+            rf.read((char *)&flashcards[i].userScore, sizeof(int));
+        }
+        rf.close();
+        cout <<"\nLoading all user data from file done"<<endl;
+    }
+
+    void saveData(const string &filename)
+    {
+        ofstream wf(filename, ios::out|ios::binary);
+        if(!wf)
+        {
+            cout <<"Cannot open file for writing!"<<endl;
+            return;
+        }
+
+        wf.write((char *)&count,sizeof(count));
+        for (int i = 0; i < count; i++)
+        {
+            writeString(wf, flashcards[i].question);
+            writeString(wf, flashcards[i].answer);
+            writeString(wf, flashcards[i].hint);
+            wf.write((char *)&flashcards[i].difficultyScore, sizeof(int));
+            wf.write((char *)&flashcards[i].userScore, sizeof(int));
+        }
+        wf.close();
+        cout <<"Saving all data into file done"<<endl;
+    }
+
+    private:
+     void writeString(ofstream &out, const string &str)
+    {
+        size_t len = str.size();
+        out.write((char *)&len, sizeof(len));
+        out.write(str.c_str(), len);
+    }
+
+    string readString(ifstream &in)
+    {
+        size_t len;
+        in.read((char *)&len, sizeof(len));
+        string str(len, ' ');
+        in.read(&str[0], len);
+        return str;
+    }
+
 };
 
 class Menu
@@ -191,6 +263,7 @@ class User//keeps track of user progress
     private:
     string name;
     FlashcardManager manager;
+    //ScoreManager scoreManager;
     string filename;
 
     public:
@@ -205,55 +278,14 @@ class User//keeps track of user progress
         
     }
 
-     void addNewFlashcard()
-     {
-        string name;
-
-        cout <<"Enter Name: ";
-        getline(cin,name);
-        cin.ignore(); // clear newline before taking input
-        string question, answer, hint;
-        int difficultyScore;
-
-        cout << "Enter Question: ";
-        getline(cin, question);
-        cout << "Enter Answer: ";
-        getline(cin, answer);
-        cout << "Enter Hint: ";
-        getline(cin, hint);
-        cout << "Enter Difficulty (1=Easy, 2=Moderate, 3=Hard): ";
-        cin >> difficultyScore;
-
-        manager.addFlashcard(question, answer, hint, difficultyScore, 0);
-
-        }
+    void saveData()
+    {
+        manager.saveData(filename);
+    }
 
     void loadData()
     {
-        ifstream rf(filename, ios::in|ios::binary);
-        if(!rf)
-        {
-            cout <<"Cannot open file for reading!"<<endl;
-            return;
-        }
-
-        rf.read((char*)&manager,sizeof(FlashcardManager));
-        rf.close();
-        cout <<"\nLoading all user data from file done"<<endl;
-    }
-
-    void saveData()
-    {
-        ofstream wf(filename, ios::out|ios::binary);
-        if(!wf)
-        {
-            cout <<"Cannot open file for writing!"<<endl;
-            return;
-        }
-
-        wf.write((char *)&manager,sizeof(FlashcardManager));
-        wf.close();
-        cout <<"Saving all data into file done"<<endl;
+        manager.loadData(filename);
     }
 
     void startSession() 
@@ -262,21 +294,22 @@ class User//keeps track of user progress
         int option;
         do
         {
-            
-        } while (option!=7);
-        
+            Menu::display();
+            cout <<"Your choice: ";
+            cin>>option;
+            cin.ignore();
             switch (option) {
             case 1:
-                addNewFlashcard();
+                addFlashcard();
                 break;
             case 2:
                 manager.reviewFlashcards();
                 break;
             case 3:
-                saveData();
+                manager.saveData(filename);
                 break;
             case 4:
-                loadData();
+                manager.loadData(filename);
                 break;
             case 5:
                 manager.displayFlashcards();
@@ -291,8 +324,29 @@ class User//keeps track of user progress
                 cout << "Invalid choice! Please try again." << endl;
                 break;
             }        
-        }
-    };
+            
+        } while (option!=7);
+    }
+
+    private:
+    void addFlashcard()
+    {
+        string q, a, h;
+        int diff;
+
+        cout << "Enter question: ";
+        getline(cin, q);
+        cout << "Enter answer: ";
+        getline(cin, a);
+        cout << "Enter hint: ";
+        getline(cin, h);
+
+
+
+        manager.addFlashcard(q, a, h, 0, 0);
+    }
+
+};
 
 int main()
 {
@@ -300,3 +354,4 @@ int main()
     user.startSession();
     return 0;
 }
+
