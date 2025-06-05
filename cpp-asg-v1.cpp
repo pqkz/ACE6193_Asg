@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
 #include <string>
 using namespace std;
 
@@ -196,12 +197,22 @@ class User//keeps track of user progress
     public:
     User(const string &file = "flashcards_data.dat"):filename(file){}
     
-    void addNewUser()
+    void addNewFlashcard()
     {
-        string name;
+    cin.ignore(); // clear newline before taking input
+    string question, answer, hint;
+    int difficultyScore;
 
-        cout <<"Enter Name: ";
-        getline(cin,name);
+    cout << "Enter Question: ";
+    getline(cin, question);
+    cout << "Enter Answer: ";
+    getline(cin, answer);
+    cout << "Enter Hint: ";
+    getline(cin, hint);
+    cout << "Enter Difficulty (1=Easy, 2=Moderate, 3=Hard): ";
+    cin >> difficultyScore;
+
+    manager.addFlashcard(question, answer, hint, difficultyScore, 0);
         
     }
 
@@ -258,45 +269,13 @@ class User//keeps track of user progress
 
     void startSession() 
     {
-        addNewUser();
-        int option;
-        do
-        {
-            
-        } while (option!=7);
-        
-            switch (option) {
-            case 1:
-                addNewFlashcard();
-                break;
-            case 2:
-                manager.reviewFlashcards();
-                break;
-            case 3:
-                saveData();
-                break;
-            case 4:
-                loadData();
-                break;
-            case 5:
-                manager.displayFlashcards();
-                break;
-            case 6:
-                //scoreManager.displayScores(); 
-                break;
-            case 7:
-                cout<< "Exiting program." << endl;
-                break;
-            default:
-                cout << "Invalid choice! Please try again." << endl;
-                break;
-            }        
-        }
-    };
-
+    }
+};
 int main()
 {
+
     User user;
     user.startSession();
     return 0;
 }
+
