@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
 #include <string>
 using namespace std;
 
@@ -196,12 +197,22 @@ class User//keeps track of user progress
     public:
     User(const string &file = "flashcards_data.dat"):filename(file){}
     
-    void addNewUser()
+    void addNewFlashcard()
     {
-        string name;
+    cin.ignore(); // clear newline before taking input
+    string question, answer, hint;
+    int difficultyScore;
 
-        cout <<"Enter Name: ";
-        getline(cin,name);
+    cout << "Enter Question: ";
+    getline(cin, question);
+    cout << "Enter Answer: ";
+    getline(cin, answer);
+    cout << "Enter Hint: ";
+    getline(cin, hint);
+    cout << "Enter Difficulty (1=Easy, 2=Moderate, 3=Hard): ";
+    cin >> difficultyScore;
+
+    manager.addFlashcard(question, answer, hint, difficultyScore, 0);
         
     }
 
@@ -235,11 +246,49 @@ class User//keeps track of user progress
 
     void startSession()
     {
+        int choice = 0;
+        while (choice != 5) {
+            cout << "\n===== Digital Flashcard Menu =====" << endl;
+            cout << "1. Display all flashcards" << endl;
+            cout << "2. Add new flashcard" << endl;
+            cout << "3. Review flashcards" << endl;
+            cout << "4. Save flashcards to file" << endl;
+            cout << "5. Load flashcards from file" << endl;
+            cout << "6. Exit" << endl;
+            cout << "Enter choice: ";
+            cin >> choice;
+            system("CLS");
+
+            switch (choice) {
+            case 1:
+                displayData();
+                break;
+            case 2:
+                addNewFlashcard();
+                break;
+            case 3:
+                manager.reviewFlashcards();
+                break;
+            case 4:
+                saveData();
+                break;
+            case 5:
+                loadData();
+                break;
+            case 6:
+                cout << "Exiting program." << endl;
+                return;
+            default:
+                cout << "Invalid choice! Please try again." << endl;
+            }        
+        }
     }
 };
 int main()
 {
+
     User user;
     user.startSession();
     return 0;
 }
+
