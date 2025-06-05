@@ -54,6 +54,14 @@ class Flashcard //load, save flashcard
         return hint;
     }
 
+    void updateUserScore(bool correct)
+    {
+        if(correct)
+            userScore++;
+        else if(userScore>0)
+            userScore--;
+    }
+
     //void save(ofstream& out)const { //savefile
 
     //}
@@ -120,6 +128,17 @@ class FlashcardManager //add flashcards,manage cards
         }
 
         string userAnswer;
+        //bubble sort implementation (spaced repetition)
+        for(int i=0;i<count-1;i++)
+        {
+            for(int j=0;j<count-1;j++)
+            {
+                if(flashcards[j].getUserScore()>flashcards[j+1].getUserScore())
+                {
+                    swap(flashcards[j],flashcards[j+1]);
+                }
+            }
+        }
         for (int i = 0; i < count; ++i) {
             cout << "\nFlashcard " << (i + 1) << ":\n";
             flashcards[i].display();
@@ -129,6 +148,7 @@ class FlashcardManager //add flashcards,manage cards
 
             if (flashcards[i].checkAnswer(userAnswer)) {
                 cout << "Correct!\n";
+                flashcards[i].updateUserScore(true);
             } else {
                 cout << "Incorrect.\n";
                 cout << "Hint: " << flashcards[i].getHint() << "\n";
@@ -137,8 +157,11 @@ class FlashcardManager //add flashcards,manage cards
 
                 if (flashcards[i].checkAnswer(userAnswer)) {
                     cout << "Correct on second try.\n";
+                    flashcards[i].updateUserScore(true);
                 } else {
                     cout << "Still incorrect. Correct answer: " << flashcards[i].answer << "\n";
+                    flashcards[i].updateUserScore(false);
+
                 }
             }
         }
@@ -157,7 +180,9 @@ public:
         cout <<"2. Review Flash Card: "<<endl;
         cout <<"3. Save Cards: "<<endl;
         cout <<"4. Load Cards: "<<endl;
-        cout <<"5. Exit: "<<endl;
+        cout <<"5. Display All Flash Cards"<<endl;
+        cout <<"6. Show User Scores"<<endl;
+        cout <<"7. Exit: "<<endl;
     }
 };
 
