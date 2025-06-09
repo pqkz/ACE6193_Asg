@@ -85,6 +85,16 @@ class Flashcard
         userScore = scoreManager.UserScore;  // Sync userScore here
     }
 
+    string getDifficultyLevel() const {
+    switch (difficultyScore) {
+        case 1: return "Easy";
+        case 2: return "Moderate";
+        case 3: return "Hard";
+        default: return "Unrated";
+    }
+}
+
+
 };
 
 class FlashcardManager //add flashcards,manage cards 
@@ -289,8 +299,6 @@ class User//keeps track of user progress
     
     void addNewUser()
     {
-        string name;
-
         cout <<"Enter Name: ";
         getline(cin,name);
         
@@ -308,6 +316,8 @@ class User//keeps track of user progress
     }
 
     void displayScore() {
+        cout << "Showing flashcard scores for user: " << name << "\n\n";
+
         if (manager.count == 0)
         {
             cout << "No flashcards available.\n";
@@ -317,6 +327,7 @@ class User//keeps track of user progress
         {
             cout << "Flashcard " << (i + 1) << ": " << manager.flashcards[i].question << "\n";
             cout << "Your Score: " << manager.flashcards[i].getUserScore() << "\n\n";
+            cout << "Difficulty Level: " << manager.flashcards[i].getDifficultyLevel() << "\n\n";
         }
     }
     void startSession() 
