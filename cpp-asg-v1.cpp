@@ -1,11 +1,35 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <limits>
 using namespace std;
 
 //MAXIMUM LIMITS
 const int MAX_FLASHCARDS = 20;
 const int MAX_USERS = 10;
+
+class ScoreManager
+{
+public:
+    int UserScore;
+    ScoreManager():UserScore(0){}
+
+    bool Review(int total = 3)const{
+        return UserScore<total; // space repetition
+    }
+    void updateUserScore(bool correct)
+    {
+        if(correct)
+        {
+            if(UserScore < 5) //increase score up to a max of 5
+            {UserScore++;}
+        }
+        else if(UserScore > 0) 
+        {
+            UserScore--;
+        }
+    }
+};
 
 class Flashcard 
 {
@@ -16,6 +40,7 @@ class Flashcard
     string hint;
     int difficultyScore; // (1 = Easy, 2 = Moderate, 3 = Hard);
     int userScore;
+    ScoreManager scoreManager;
 
     //public:
     Flashcard() //default constructor;
@@ -54,19 +79,11 @@ class Flashcard
         return hint;
     }
 
-    void updateUserScore(bool correct)
+     void updateUserScore(bool correct)
     {
-        if(correct)
-            userScore++;
-        else if(userScore>0)
-            userScore--;
+        scoreManager.updateUserScore(correct);
+        userScore = scoreManager.UserScore;  // Sync userScore here
     }
-
-};
-
-class ScoreManager
-{
-
 
 };
 
@@ -122,7 +139,7 @@ class FlashcardManager //add flashcards,manage cards
             return;
         }
 
-        string userAnswer;
+         string userAnswer;
         //bubble sort implementation (spaced repetition)
         for(int i=0;i<count-1;i++)
         {
@@ -158,6 +175,7 @@ class FlashcardManager //add flashcards,manage cards
                     flashcards[i].updateUserScore(false);
 
                 }
+
             }
 
             int difficulty;
@@ -278,6 +296,7 @@ class User//keeps track of user progress
         
     }
 
+
     void saveData()
     {
         manager.saveData(filename);
@@ -288,6 +307,18 @@ class User//keeps track of user progress
         manager.loadData(filename);
     }
 
+    void displayScore() {
+        if (manager.count == 0)
+        {
+            cout << "No flashcards available.\n";
+            return;
+        }
+        for (int i = 0; i < manager.count; ++i)
+        {
+            cout << "Flashcard " << (i + 1) << ": " << manager.flashcards[i].question << "\n";
+            cout << "Your Score: " << manager.flashcards[i].getUserScore() << "\n\n";
+        }
+    }
     void startSession() 
     {
         addNewUser();
@@ -315,7 +346,7 @@ class User//keeps track of user progress
                 manager.displayFlashcards();
                 break;
             case 6:
-                //scoreManager.displayScores(); 
+                displayScore();
                 break;
             case 7:
                 cout<< "Exiting program." << endl;
