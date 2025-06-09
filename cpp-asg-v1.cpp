@@ -6,7 +6,6 @@ using namespace std;
 
 //MAXIMUM LIMITS
 const int MAX_FLASHCARDS = 20;
-const int MAX_USERS = 10;
 
 class ScoreManager
 {
